@@ -3,7 +3,13 @@ import {
   provideBrowserGlobalErrorListeners,
   provideZonelessChangeDetection,
 } from '@angular/core';
-import { provideRouter, withComponentInputBinding, withInMemoryScrolling } from '@angular/router';
+import {
+  provideRouter,
+  withComponentInputBinding,
+  withHashLocation,
+  withInMemoryScrolling,
+} from '@angular/router';
+import { environment } from '../environments/environment';
 
 import { routes } from './app.routes';
 
@@ -15,6 +21,7 @@ export const appConfig: ApplicationConfig = {
       routes,
       withComponentInputBinding(),
       withInMemoryScrolling({ scrollPositionRestoration: 'top', anchorScrolling: 'enabled' }),
+      ...(environment.hashRouting ? [withHashLocation()] : []),
     ),
   ],
 };

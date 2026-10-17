@@ -6,7 +6,8 @@
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "build:preview": "ng build --configuration production,preview"
   },
   "prettier": {
     "printWidth": 100,

@@ -8,4 +8,6 @@ export const environment = {
   /** WhatsApp number in international format without "+", used for the chat button. */
   whatsappNumber: '919999999999',
   supportEmail: 'support@turftackles.in',
+  /** Use #/ URLs so the site works on static hosts without server rewrites. */
+  hashRouting: false,
 };
