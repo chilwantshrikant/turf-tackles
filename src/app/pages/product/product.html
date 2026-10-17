@@ -1,0 +1,151 @@
+@if (product(); as p) {
+  <div class="container page">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a routerLink="/">Home</a> / <a routerLink="/shop">Shop</a> /
+      <a routerLink="/shop" [queryParams]="{ league: p.league }">{{ leagues[p.league] }}</a> /
+      <span>{{ p.team }}</span>
+    </nav>
+
+    <div class="layout">
+      <!-- Gallery -->
+      <div class="gallery">
+        <div class="stage">
+          <span class="off">-{{ discount() }}%</span>
+          <app-jersey-art [design]="p.design" [view]="view()" [name]="customise() ? customName() : ''"
+                          [number]="customise() ? customNumber() : ''" [label]="title() + ' ' + view()" />
+        </div>
+        <div class="thumbs" role="tablist" aria-label="View">
+          <button role="tab" [attr.aria-selected]="view() === 'front'" [class.on]="view() === 'front'" (click)="view.set('front')">
+            <app-jersey-art [design]="p.design" view="front" /><span>Front</span>
+          </button>
+          <button role="tab" [attr.aria-selected]="view() === 'back'" [class.on]="view() === 'back'" (click)="view.set('back')">
+            <app-jersey-art [design]="p.design" view="back" [name]="customise() ? customName() : ''"
+                            [number]="customise() ? customNumber() : ''" /><span>Back</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Buy box -->
+      <div class="buy">
+        <p class="meta">{{ leagues[p.league] }} · {{ p.kit }} kit · {{ p.season }}</p>
+        <h1>{{ title() }}</h1>
+        <p class="desc">{{ p.description }}</p>
+
+        <div class="price">
+          <strong>{{ unitPrice() | inr }}</strong>
+          <s>{{ mrp() | inr }}</s>
+          <span class="save">Save {{ discount() }}%</span>
+        </div>
+        <p class="tax">Inclusive of all taxes · Free shipping above {{ freeShippingAbove | inr }}</p>
+
+        <h2 class="label">Version</h2>
+        <div class="vgrid">
+          @for (v of versions(); track v.id) {
+            <button class="vopt" [class.on]="version() === v.id" (click)="version.set(v.id)" [attr.aria-pressed]="version() === v.id">
+              <span class="vname">{{ v.short }}</span>
+              <span class="vprice">{{ priceOf(v.id) | inr }}</span>
+            </button>
+          }
+        </div>
+        <p class="vnote">{{ versionInfo[version()].tagline }} · {{ versionInfo[version()].fit }}</p>
+
+        <div class="label-row" id="sizes">
+          <h2 class="label">Size</h2>
+          <button class="link" (click)="openPanel.set('size'); scrollTo('size-guide')">Size guide</button>
+        </div>
+        <div class="sizes" [class.error]="sizeError()">
+          @for (s of sizes; track s) {
+            <button [class.on]="size() === s" (click)="pickSize(s)" [attr.aria-pressed]="size() === s">{{ s }}</button>
+          }
+        </div>
+        @if (sizeError()) { <p class="err">Please select a size</p> }
+
+        <div class="custom" [class.on]="customise()">
+          <label class="switch">
+            <input type="checkbox" [checked]="customise()" (change)="toggleCustomise($any($event.target).checked)" />
+            <span class="track"></span>
+            <span><strong>Add name &amp; number</strong> <small>+{{ customPrice | inr }}</small></span>
+          </label>
+          @if (customise()) {
+            <div class="custom-fields">
+              <div class="field">
+                <label for="cname">Name (max 12)</label>
+                <input id="cname" [value]="customName()" (input)="onName($any($event.target).value)" placeholder="e.g. MESSI" autocomplete="off" />
+              </div>
+              <div class="field num">
+                <label for="cnum">Number</label>
+                <input id="cnum" inputmode="numeric" [value]="customNumber()" (input)="onNumber($any($event.target).value)" placeholder="10" autocomplete="off" />
+              </div>
+            </div>
+            @if (customError()) { <p class="err">Enter a name or number to print</p> }
+            <p class="hint">Live preview shown on the back view. Customised jerseys can't be exchanged.</p>
+          }
+        </div>
+
+        <div class="actions">
+          <div class="qty" aria-label="Quantity">
+            <button (click)="qty.set(qty() > 1 ? qty() - 1 : 1)" aria-label="Decrease">−</button>
+            <span>{{ qty() }}</span>
+            <button (click)="qty.set(qty() < 10 ? qty() + 1 : 10)" aria-label="Increase">+</button>
+          </div>
+          <button class="btn btn-dark add" (click)="addToCart()">Add to cart</button>
+        </div>
+        <button class="btn btn-primary btn-block" (click)="addToCart(true)">Buy it now · {{ unitPrice() * qty() | inr }}</button>
+
+        <ul class="perks">
+          <li>🚚 Dispatch in 24–48 hrs, delivery in 3–6 days</li>
+          <li>💵 Cash on Delivery available</li>
+          <li>🔁 Easy 7-day size exchange</li>
+        </ul>
+
+        <div class="acc">
+          <button (click)="toggle('details')" [attr.aria-expanded]="openPanel() === 'details'">
+            {{ versionInfo[version()].name }} details <span>{{ openPanel() === 'details' ? '−' : '+' }}</span>
+          </button>
+          @if (openPanel() === 'details') {
+            <ul class="panel-body ticks">
+              @for (f of versionInfo[version()].features; track f) { <li>{{ f }}</li> }
+              <li>Wash inside-out in cold water; do not iron on prints</li>
+            </ul>
+          }
+          <button id="size-guide" (click)="toggle('size')" [attr.aria-expanded]="openPanel() === 'size'">
+            Size guide <span>{{ openPanel() === 'size' ? '−' : '+' }}</span>
+          </button>
+          @if (openPanel() === 'size') {
+            <div class="panel-body">
+              <table class="chart">
+                <thead><tr><th>Size</th><th>Chest (in)</th><th>Length (in)</th></tr></thead>
+                <tbody>
+                  @for (r of sizeChart; track r[0]) { <tr><td>{{ r[0] }}</td><td>{{ r[1] }}</td><td>{{ r[2] }}</td></tr> }
+                </tbody>
+              </table>
+              <p class="hint">Player version is a slim fit — we recommend one size up.</p>
+            </div>
+          }
+          <button (click)="toggle('shipping')" [attr.aria-expanded]="openPanel() === 'shipping'">
+            Shipping &amp; returns <span>{{ openPanel() === 'shipping' ? '−' : '+' }}</span>
+          </button>
+          @if (openPanel() === 'shipping') {
+            <div class="panel-body">
+              <p>Free shipping on orders above {{ freeShippingAbove | inr }}; ₹79 otherwise. Orders ship within 48 hours
+                and reach you in 3–6 working days. Unworn, non-customised jerseys can be exchanged for a different size within 7 days.</p>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <section class="section">
+      <div class="section-head"><h2 class="display">You may also like</h2></div>
+      <div class="grid cols-4">
+        @for (r of related(); track r.id) { <app-product-card [product]="r" /> }
+      </div>
+    </section>
+  </div>
+} @else {
+  <div class="container missing">
+    <h1 class="display">Jersey not found</h1>
+    <p>This jersey may have sold out or moved.</p>
+    <a routerLink="/shop" class="btn btn-primary">Browse all jerseys</a>
+  </div>
+}

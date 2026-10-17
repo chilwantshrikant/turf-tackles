@@ -1,0 +1,85 @@
+<div class="container page">
+  <h1 class="display">Your cart</h1>
+
+  @if (lines().length) {
+    <div class="layout">
+      <section>
+        <div class="ship panel">
+          @if (toFreeShipping() > 0) {
+            <p>Add <strong>{{ toFreeShipping() | inr }}</strong> more for <strong>free shipping</strong></p>
+          } @else {
+            <p>🎉 You've unlocked <strong>free shipping</strong></p>
+          }
+          <div class="bar"><span [style.width.%]="shippingProgress()"></span></div>
+        </div>
+
+        <ul class="items">
+          @for (l of lines(); track l.item.key) {
+            <li class="item">
+              <a class="thumb" [routerLink]="['/product', l.product.slug]" [queryParams]="{ version: l.item.version }">
+                <app-jersey-art [design]="l.product.design" [view]="l.item.custom ? 'back' : 'front'"
+                                [name]="l.item.custom?.name ?? ''" [number]="l.item.custom?.number ?? ''" />
+              </a>
+              <div class="info">
+                <a class="name" [routerLink]="['/product', l.product.slug]" [queryParams]="{ version: l.item.version }">{{ l.title }}</a>
+                <p class="opts">
+                  <span>{{ versions[l.item.version].name }}</span>
+                  <span>Size {{ l.item.size }}</span>
+                  @if (l.item.custom) {
+                    <span class="print">Print: {{ l.item.custom.name || '—' }} {{ l.item.custom.number }}</span>
+                  }
+                </p>
+                <div class="row">
+                  <div class="qty" aria-label="Quantity">
+                    <button (click)="cart.setQty(l.item.key, l.item.qty - 1)" [attr.aria-label]="l.item.qty === 1 ? 'Remove' : 'Decrease'">−</button>
+                    <span>{{ l.item.qty }}</span>
+                    <button (click)="cart.setQty(l.item.key, l.item.qty + 1)" aria-label="Increase" [disabled]="l.item.qty >= 10">+</button>
+                  </div>
+                  <strong class="line">{{ l.item.unitPrice * l.item.qty | inr }}</strong>
+                </div>
+              </div>
+              <button class="remove" (click)="cart.remove(l.item.key)" aria-label="Remove item">✕</button>
+            </li>
+          }
+        </ul>
+        <a routerLink="/shop" class="back">← Continue shopping</a>
+      </section>
+
+      <aside class="summary panel">
+        <h2>Order summary</h2>
+
+        @if (cart.coupon(); as code) {
+          <div class="applied">
+            <span>Coupon <strong>{{ code }}</strong> applied</span>
+            <button (click)="cart.coupon.set(null)">Remove</button>
+          </div>
+        } @else {
+          <form class="coupon" (submit)="$event.preventDefault(); applyCoupon()">
+            <input [value]="couponInput()" (input)="couponInput.set($any($event.target).value); couponError.set(false)"
+                   placeholder="Coupon code" aria-label="Coupon code" />
+            <button class="btn btn-outline" type="submit" [disabled]="!couponInput().trim()">Apply</button>
+          </form>
+          @if (couponError()) { <p class="err">That code isn't valid. Try TURF10.</p> }
+        }
+
+        <dl>
+          <div><dt>Subtotal ({{ cart.count() }} items)</dt><dd>{{ totals().subtotal | inr }}</dd></div>
+          @if (totals().discount) {
+            <div class="disc"><dt>Discount</dt><dd>−{{ totals().discount | inr }}</dd></div>
+          }
+          <div><dt>Shipping</dt><dd>{{ totals().shipping ? (totals().shipping | inr) : 'FREE' }}</dd></div>
+          <div class="total"><dt>Total</dt><dd>{{ totals().total | inr }}</dd></div>
+        </dl>
+        <a routerLink="/checkout" class="btn btn-primary btn-block">Proceed to checkout</a>
+        <p class="secure">🔒 Secure checkout · UPI, cards, net banking &amp; COD</p>
+      </aside>
+    </div>
+  } @else {
+    <div class="empty panel">
+      <p class="emoji">🛒</p>
+      <h2>Your cart is empty</h2>
+      <p>Find your club's latest kit and get it printed with your name.</p>
+      <a routerLink="/shop" class="btn btn-primary">Shop jerseys</a>
+    </div>
+  }
+</div>

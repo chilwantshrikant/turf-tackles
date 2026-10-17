@@ -1,0 +1,151 @@
+<section class="hero">
+  <div class="container hero-grid">
+    <div class="copy">
+      <span class="kicker">New season · 25/26 kits are here</span>
+      <h1 class="display">Wear the<br /><em>badge.</em></h1>
+      <p>Club and country jerseys in three versions — Fan, Master &amp; Player. Add your name and number,
+        pay by UPI, card or cash on delivery.</p>
+      <div class="cta">
+        <a routerLink="/shop" class="btn btn-primary">Shop all jerseys</a>
+        <a routerLink="/" fragment="versions" class="btn btn-ghost">Compare versions</a>
+      </div>
+      <ul class="stats">
+        <li><strong>28+</strong><span>Kits in stock</span></li>
+        <li><strong>₹799</strong><span>Starting price</span></li>
+        <li><strong>3–6</strong><span>Day delivery</span></li>
+      </ul>
+    </div>
+    <div class="trio" aria-hidden="true">
+      @for (p of heroTrio; track p.id; let i = $index) {
+        <a class="t t{{ i }}" [routerLink]="['/product', p.slug]" tabindex="-1">
+          <app-jersey-art [design]="p.design" />
+        </a>
+      }
+    </div>
+  </div>
+</section>
+
+<section class="trust container">
+  <div><span>🚚</span><p><strong>Free shipping</strong> above ₹1,499</p></div>
+  <div><span>💵</span><p><strong>Cash on delivery</strong> across India</p></div>
+  <div><span>🔁</span><p><strong>7-day</strong> size exchange</p></div>
+  <div><span>🔒</span><p><strong>Secure</strong> UPI &amp; card payments</p></div>
+</section>
+
+<section class="section container" id="versions">
+  <div class="section-head">
+    <div>
+      <h2 class="display">Shop by version</h2>
+      <p>Pick the quality that suits how you wear it.</p>
+    </div>
+  </div>
+  <div class="versions">
+    @for (v of versions; track v.id) {
+      <a class="vcard {{ v.id }}" routerLink="/shop" [queryParams]="{ version: v.id }">
+        <div class="vtext">
+          <span class="vtag">{{ v.tagline }}</span>
+          <h3 class="display">{{ v.name }}</h3>
+          <p>From <strong>{{ v.basePrice | inr }}</strong> <s>{{ v.mrp | inr }}</s></p>
+          <span class="go">Shop {{ v.short }} →</span>
+        </div>
+        <app-jersey-art [design]="versionArt[v.id]" />
+      </a>
+    }
+  </div>
+</section>
+
+<section class="section container tight">
+  <div class="section-head">
+    <div>
+      <h2 class="display">Bestsellers</h2>
+      <p>The shirts everyone's wearing this season.</p>
+    </div>
+    <a routerLink="/shop">View all</a>
+  </div>
+  <div class="grid cols-4">
+    @for (p of bestsellers; track p.id) {
+      <app-product-card [product]="p" />
+    }
+  </div>
+</section>
+
+<section class="section container tight">
+  <div class="section-head">
+    <div><h2 class="display">Shop by league</h2></div>
+  </div>
+  <div class="leagues">
+    @for (l of leagues; track l[0]) {
+      <a class="chip" routerLink="/shop" [queryParams]="{ league: l[0] }">{{ l[1] }}</a>
+    }
+  </div>
+</section>
+
+<section class="section container tight">
+  <div class="custom">
+    <div class="custom-copy">
+      <span class="kicker">Personalise it</span>
+      <h2 class="display">Your name.<br />Your number.</h2>
+      <p>Official-style name &amp; number printing on any jersey for just ₹199. Preview it live before you buy.</p>
+      <a routerLink="/product/brazil-home-2026" class="btn btn-primary">Try the customiser</a>
+    </div>
+    <app-jersey-art class="custom-art" [design]="customArt" view="back" name="YOUR NAME" number="7" />
+  </div>
+</section>
+
+@if (newArrivals.length) {
+  <section class="section container tight">
+    <div class="section-head">
+      <div><h2 class="display">New arrivals</h2><p>Fresh drops for 25/26.</p></div>
+      <a routerLink="/shop" [queryParams]="{ sort: 'featured' }">View all</a>
+    </div>
+    <div class="grid cols-4">
+      @for (p of newArrivals; track p.id) {
+        <app-product-card [product]="p" />
+      }
+    </div>
+  </section>
+}
+
+<section class="section container tight">
+  <div class="section-head">
+    <div><h2 class="display">Fan vs Master vs Player</h2><p>Not sure which to choose? Here's the difference.</p></div>
+  </div>
+  <div class="compare-wrap">
+    <table class="compare">
+      <thead>
+        <tr>
+          <th></th>
+          @for (v of versions; track v.id) {
+            <th>{{ v.name }}<small>from {{ v.basePrice | inr }}</small></th>
+          }
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of compareRows; track row[0]) {
+          <tr>
+            <th scope="row">{{ row[0] }}</th>
+            <td>{{ row[1] }}</td><td>{{ row[2] }}</td><td>{{ row[3] }}</td>
+          </tr>
+        }
+        <tr>
+          <th scope="row"></th>
+          @for (v of versions; track v.id) {
+            <td><a class="btn btn-outline small" routerLink="/shop" [queryParams]="{ version: v.id }">Shop {{ v.short }}</a></td>
+          }
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="section container tight">
+  <div class="section-head">
+    <div><h2 class="display">Retro classics</h2><p>Legendary shirts from unforgettable seasons.</p></div>
+    <a routerLink="/shop" [queryParams]="{ league: 'retro' }">View all</a>
+  </div>
+  <div class="grid cols-4">
+    @for (p of retro; track p.id) {
+      <app-product-card [product]="p" />
+    }
+  </div>
+</section>

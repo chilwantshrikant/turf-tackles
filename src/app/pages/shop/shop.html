@@ -1,0 +1,99 @@
+<section class="banner">
+  <div class="container">
+    <p class="crumbs">Home / Shop</p>
+    <h1 class="display">{{ heading() }}</h1>
+    <div class="vtabs" role="tablist" aria-label="Version">
+      <button class="chip" [class.active]="!version()" (click)="setVersion(null)">All versions</button>
+      @for (v of versions; track v.id) {
+        <button class="chip" [class.active]="version() === v.id" (click)="setVersion(v.id)">
+          {{ v.name }} <small>{{ v.basePrice | inr }}+</small>
+        </button>
+      }
+    </div>
+  </div>
+</section>
+
+<div class="container layout">
+  <div class="scrim" [class.show]="filtersOpen()" (click)="filtersOpen.set(false)"></div>
+  <aside class="filters" [class.show]="filtersOpen()" aria-label="Filters">
+    <div class="fhead">
+      <h2 class="display">Filters</h2>
+      <button class="close" (click)="filtersOpen.set(false)" aria-label="Close filters">✕</button>
+    </div>
+
+    <div class="group">
+      <h3>Version</h3>
+      @for (v of versions; track v.id) {
+        <label class="opt">
+          <input type="checkbox" [checked]="version() === v.id" (change)="setVersion(v.id)" />
+          <span>{{ v.name }}</span><small>{{ v.basePrice | inr }}+</small>
+        </label>
+      }
+    </div>
+
+    <div class="group">
+      <h3>League</h3>
+      @for (l of leagues; track l[0]) {
+        <label class="opt">
+          <input type="checkbox" [checked]="league() === l[0]" (change)="setLeague(l[0])" />
+          <span>{{ l[1] }}</span>
+        </label>
+      }
+    </div>
+
+    <div class="group">
+      <h3>Price</h3>
+      @for (p of priceSteps; track p) {
+        <label class="opt">
+          <input type="checkbox" [checked]="maxPrice() === p" (change)="setMaxPrice(p)" />
+          <span>Under {{ p | inr }}</span>
+        </label>
+      }
+    </div>
+
+    <button class="btn btn-dark btn-block apply" (click)="filtersOpen.set(false)">
+      Show {{ results().length }} jerseys
+    </button>
+  </aside>
+
+  <section class="results">
+    <div class="toolbar">
+      <button class="btn btn-outline fbtn" (click)="filtersOpen.set(true)">
+        Filters @if (activeCount()) { <span class="badge">{{ activeCount() }}</span> }
+      </button>
+      <p class="count">{{ results().length }} jerseys</p>
+      <label class="sort">
+        <span class="sr-only">Sort by</span>
+        <select [value]="sort()" (change)="setSort($any($event.target).value)">
+          @for (s of sorts; track s.key) {
+            <option [value]="s.key" [selected]="s.key === sort()">{{ s.label }}</option>
+          }
+        </select>
+      </label>
+    </div>
+
+    @if (activeCount()) {
+      <div class="active">
+        @if (query()) { <button class="chip active" (click)="clearQuery()">“{{ query() }}” ✕</button> }
+        @if (version()) { <button class="chip active" (click)="setVersion(null)">{{ versionMap[version()!].name }} ✕</button> }
+        @if (league()) { <button class="chip active" (click)="setLeague(null)">{{ leagueMap[league()!] }} ✕</button> }
+        @if (maxPrice()) { <button class="chip active" (click)="setMaxPrice(null)">Under {{ maxPrice() | inr }} ✕</button> }
+        <button class="link" (click)="clearAll()">Clear all</button>
+      </div>
+    }
+
+    @if (results().length) {
+      <div class="grid">
+        @for (p of results(); track p.id) {
+          <app-product-card [product]="p" [version]="version()" />
+        }
+      </div>
+    } @else {
+      <div class="empty panel">
+        <p class="display">No jerseys found</p>
+        <p>Try a different team name or remove a filter.</p>
+        <button class="btn btn-primary" (click)="clearAll()">Clear filters</button>
+      </div>
+    }
+  </section>
+</div>
