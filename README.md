@@ -1,59 +1,34 @@
-# TurfTackles
+# Turf Tackles — Football Jersey Store
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 20.3.40.
+Responsive storefront for selling football jerseys in **Fan**, **Master** and **Player** versions.
+Built with Angular 20 (standalone components, signals, zoneless) and hand-written SCSS. No UI library.
 
-## Development server
+## Features
+- **Home page**: hero, shop-by-version cards, bestsellers, leagues, a name & number promo, a version comparison table and retro classics
+- **Catalogue** (`/shop`): filter by version, league and price; search; sort. The filters live in the URL so a link can be shared (`/shop?version=master&league=la-liga`)
+- **Product page**: pick the version (each has its own price), size, quantity and optional **name & number printing** (+₹199) with a live back-of-shirt preview, plus a size guide and shipping info
+- **Cart**: change quantities, coupon codes (`TURF10`, `WELCOME5`), and a free-shipping progress bar. The cart is saved in the browser
+- **Checkout**: address form checked for Indian mobile numbers and pincodes, **online payment via Razorpay** (UPI, cards, net banking, wallets) or **Cash on Delivery** (+₹49)
+- Order confirmation page, WhatsApp chat button, dark mode, and layouts that work on both phone and desktop
 
-To start a local development server, run:
-
+## Run locally
 ```bash
-ng serve
+npm install
+npm start          # http://localhost:4200
+npm run build      # production build in dist/turf-tackles/browser
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+## Where to change things
+| What | File |
+| --- | --- |
+| Jerseys (team, kit, season, league, colours, versions stocked, price overrides) | `src/app/data/catalog.ts` → `PRODUCTS` |
+| Version names, base prices, MRP and features | `src/app/data/catalog.ts` → `VERSIONS` |
+| Shipping fee, free-shipping threshold, COD fee, coupons, printing price | `src/app/data/catalog.ts` |
+| Razorpay key, WhatsApp number, support email | `src/environments/environment.ts` |
 
-## Code scaffolding
+Product images are drawn as colour-coded SVG jerseys (`src/app/shared/jersey-art.ts`). When you have real
+product photos, add an `image` field to `Product` and render an `<img>` in `product-card.ts` and the product page.
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
-```bash
-ng generate component component-name
-```
-
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
-```bash
-ng generate --help
-```
-
-## Building
-
-To build the project run:
-
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+## Payments: going live
+1. Create a Razorpay account and put your Key ID in `environment.ts` (`razorpayKeyId`). While it is empty, checkout runs in **demo mode** and only pretends to take payment.
+2. **Before going live, add a small backend.** It should create the Razorpay order (and pass its `order_id` into checkout), verify the payment signature, and save the order. Right now orders are stored only in the shopper's browser (`localStorage`), so you will not see them. The hook point is `collectOnlinePayment()` in `src/app/core/order.service.ts`.
